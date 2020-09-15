@@ -133,6 +133,7 @@ covid_maryland_august_case_rate <- covid_county_august_case_rate %>%
 **Task (Write Code)**: In the codeblock below, create a new object called covid_virginia_august_case rate.  It should filter covid_county_august_case_rate to only examine Virginia counties, similar to what we did above with Virginia.   
 
 ```{r}
+covid_virginia_august_case_rate <- covid_county_august_case_rate %>% filter(state=="Virginia")
 
 ```
 
@@ -184,13 +185,24 @@ covid_maryland_july_aug_pct_change <- covid_county_monthly_case_rate %>%
 
 I'm going to send you to breakout rooms to work together to answer this question. 
 
-Q: Which Florida county had the *smallest* percent change in monthly case rate between *June* 30 and *August* 30? What was that change? 
+Q: Which Florida county had the *smallest* percent change in monthly case rate between *June* 30 and *August* 30? What was that change?
 
 To answer this question, you should create a new codeblock below.  
 
 Then, create an object called covid_florida_jun_aug_pct_change that uses the necessary steps to get the answer.  
 
 After you get the answer, in a comment inside the codeblock, write a sentence that describes your findings as simply as you can, as you might put it in a news story.    
+
+``` {r}
+covid_florida_june_aug_pct_change <- covid_county_monthly_case_rate %>%
+  select(county, state, d_2020_06_30, d_2020_08_30) %>%
+  filter(state == "Florida") %>%
+  mutate(june_aug_pct_change = (d_2020_08_30 - d_2020_06_30)/d_2020_06_30*100) %>%
+  arrange(june_aug_pct_change)
+
+#Among Florida counties, Liberty had the smallest percent change in monthly case rate between June 30 and August 30?
+
+```
 
 -30-
 
