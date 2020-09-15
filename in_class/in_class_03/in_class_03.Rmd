@@ -200,7 +200,7 @@ covid_florida_june_aug_pct_change <- covid_county_monthly_case_rate %>%
   mutate(june_aug_pct_change = (d_2020_08_30 - d_2020_06_30)/d_2020_06_30*100) %>%
   arrange(june_aug_pct_change)
 
-#Among Florida counties, Liberty had the smallest percent change in monthly case rate between June 30 and August 30?
+#Among Florida counties, Liberty had the smallest percent change in monthly case rate between June 30 and August 30.
 
 ```
 
