@@ -85,6 +85,8 @@ stephanie_day_hourly_averages <- read_csv("data/temperature_sensors/stephanie/st
 
 ```{r}
 
+michael_day_hourly_averages <- read_csv("data/temperature_sensors/michael/michael_day_hourly_averages.csv")
+
 ```
 
 ## Examine data 
@@ -94,6 +96,7 @@ Now, follow the standard steps to examine the data you loaded.
 **Task (Write and Run Code)**: run the code below to glimpse() the stephanie dataframe.
 
 ```{r}
+glimpse(stephanie_day_hourly_averages)
 
 ```
 
@@ -158,7 +161,7 @@ stephanie_daily_count
 
 # Write the answer in a comment
 # Q: How many hourly readings do we have on each day in Stephanie's house?
-# A: 
+# A: 24
 ```
 Here's a slightly more complicated way of answering that exact same question.  I'm showing you this method, because it will set us up for the future. 
 
@@ -200,7 +203,7 @@ stephanie_daily_average
 
 # Write the answer in a comment
 # Q: What is the average heat index value on each day inside of Stephanie's house? Which day had the highest?
-# A: 
+# A: July 20, 2019
 
 
 ```
@@ -227,7 +230,7 @@ stephanie_daily_min_max
 
 # Write the answer in a comment
 # Q: During the seven day heat wave, what was the lowest recorded heat index value in Stephanie's house?  What was the highest heat index value, and on what day did it occur?
-# A: 
+# A: lowest 88.8 on July 16 and highest 115.7 on July 19
 
 
 ```
@@ -247,13 +250,43 @@ Create a codeblock and write code necessary to output a **single table** that gr
   * minimum heat index value on that day 
   * the average heat index value on that day 
   * the number of hourly readings on that day 
+  
+```{r}
 
+michael_day_hourly_averages <- michael_day_hourly_averages %>%
+  mutate(date = date(date_hour)) %>%
+  select(date, everything()) %>%
+  filter(date >= "2019-07-16") %>%
+  filter(date <= "2019-07-22")
+
+```
+
+``` {r}
+
+michael_daily_average <- michael_day_hourly_averages %>%
+  group_by(date) %>%
+  summarise(heat_index_averages=mean(mean_indoor_heat_index),             heat_index_max=max(mean_indoor_heat_index),
+            heat_index_min=min(mean_indoor_heat_index), count=n())
+
+
+
+michael_daily_average
+
+````
 That should allow you to answer the following questions:
 
 * Q: What was the highest heat index value measured in Michael's house? On what day did it occur?
+  A: July 18, 114.6
 * Q: The heat index never fell below what value during the period we measured? 
+  A: 96
 * Q: What was the average heat index value on each day during the period measured? 
+  A: July 16, 99.9
+     July 17, 104.0
+     July 18, 105.5
+     July 19, 107.8
+     July 20, 108.9
 * Q: Is there anything concerning the number of hourly readings on each day that could affect the results you're getting?
+  A: The lower number of hourly readings from July 20 could affect that day's results.
   
 -30-
 
