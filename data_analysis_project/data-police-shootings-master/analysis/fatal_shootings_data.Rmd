@@ -1,0 +1,81 @@
+---
+title: "fata_shootings_data"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# load libraries
+```{r}
+
+library(tidyverse)
+
+```
+
+#load data
+```{r}
+
+fatal_shootings <- read_csv("../data/fatal-police-shootings-data.csv")
+
+```
+
+# examine data
+```{r}
+
+glimpse(fatal_shootings)
+
+```
+
+# analysis
+
+“Since The Washington Post began tracking fatal shootings by police in 2015, officers have fatally shot 247 women out of the more than 5,600 people killed overall.”
+
+```{r}
+
+fatal_shootings %>%
+  arrange(date) %>%
+  select(date)
+
+```
+
+“Since 2015, Black women have accounted for less than 1 percent of the overall fatal shootings in cases where race was known..."
+
+
+```{r}
+
+fatal_shootings %>%
+  filter(race != "None") %>%
+  summarize(total_shootings = n())
+
+fatal_shootings %>%
+  filter(race == "B") %>%
+  filter(gender == "F") %>%
+  summarize(Black_women = n())
+
+
+(48/5088)*100
+
+
+
+
+fatal_shootings %>%
+  filter(race != "None") %>%
+  group_by(race, gender) %>%
+  summarize(total_shootings = n()) %>%
+  arrange(desc(total_shootings)) %>%
+  mutate(race_gender = paste(race, gender, sep = "-")) %>%
+  ungroup() %>%
+  select(race_gender, total_shootings) %>%
+  pivot_wider(names_from = race_gender, values_from = total_shootings) %>%
+  mutate(total_shootings = sum(c_across(`W-M`:`W-NA`))) %>%
+  select(total_shootings, `B-F`)
+  
+```
+
+... But within this small subset, Black women, who are 13 percent of the female population, account for 20 percent of the women shot and killed and 28 percent of the unarmed deaths.”
+
+“The starkest difference between women and men is the rate: Women account for about half the population, but 4 percent of the killings.”
+
+“Crenshaw said Black women’s deaths also may be dismissed as “collateral damage” if they are killed while police are pursuing someone else. Twenty of the 247 women were killed in that kind of situation, analysis shows. In 12 of those 20 shootings, police said the women killed were caught in crossfire or shot accidentally.”
