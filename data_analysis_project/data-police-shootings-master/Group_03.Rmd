@@ -17,7 +17,7 @@ library(tidyverse)
 #load data
 ```{r}
 
-fatal_shootings <- read_csv("../data/fatal-police-shootings-data.csv")
+fatal_shootings <- read_csv("data/fatal-police-shootings-data.csv")
 
 ```
 
@@ -44,25 +44,10 @@ fatal_shootings %>%
 
 #Finding 2
 
-“Since 2015, Black women have accounted for less than 1 percent of the overall fatal shootings in cases where race was known..."
+“Since 2015, Black women have accounted for less than 1 percent of the overall fatal shootings in cases where race was known...
 
 
 ```{r}
-
-fatal_shootings %>%
-  filter(race != "None") %>%
-  summarize(total_shootings = n())
-
-fatal_shootings %>%
-  filter(race == "B") %>%
-  filter(gender == "F") %>%
-  summarize(Black_women = n())
-
-
-(48/5088)*100
-
-
-
 
 fatal_shootings %>%
   filter(race != "None") %>%
@@ -74,11 +59,52 @@ fatal_shootings %>%
   select(race_gender, total_shootings) %>%
   pivot_wider(names_from = race_gender, values_from = total_shootings) %>%
   mutate(total_shootings = sum(c_across(`W-M`:`W-NA`))) %>%
-  select(total_shootings, `B-F`)
+  select(total_shootings, `B-F`) %>%
+  mutate(Black_female_proportion_of_fatal_shootings = `B-F`/total_shootings*100) %>%
+  select(Black_female_proportion_of_fatal_shootings)
   
 ```
 
-... But within this small subset, Black women, who are 13 percent of the female population, account for 20 percent of the women shot and killed and 28 percent of the unarmed deaths.”
+"... But within this small subset, Black women, who are 13 percent of the female population, account for 20 percent of the women shot and killed...
+
+```{r}
+
+fatal_shootings %>%
+  filter(gender == "F") %>%
+  group_by(race, gender) %>%
+  summarize(total_shootings = n()) %>%
+  arrange(desc(total_shootings)) %>%
+  mutate(race_gender = paste(race, gender, sep = "-")) %>%
+  ungroup() %>%
+  select(race_gender, total_shootings) %>%
+  pivot_wider(names_from = race_gender, values_from = total_shootings) %>%
+  mutate(total_shootings = sum(c_across(`W-F`:`O-F`))) %>%
+  select(total_shootings, `B-F`) %>%
+  mutate(Black_female_proportion_of_female_shootings = `B-F`/total_shootings*100) %>%
+  select(Black_female_proportion_of_female_shootings)
+
+```
+
+"and 28 percent of the unarmed deaths.”
+
+```{r}
+
+fatal_shootings %>%
+  filter(armed == "unarmed") %>%
+  filter(gender == "F") %>%
+  group_by(armed, race, gender) %>%
+  select(armed, race, gender) %>%
+  summarize(total_unarmed_shootings = n()) %>%
+  mutate(race_gender = paste(race, gender, sep = "-")) %>%
+  ungroup() %>%
+  select(race_gender, total_unarmed_shootings) %>%
+  pivot_wider(names_from = race_gender, values_from = total_unarmed_shootings) %>%
+  mutate(total_unarmed_shootings = sum(c_across(`B-F`:`NA-F`))) %>%
+  select(total_unarmed_shootings, `B-F`)
+  
+
+```
+
 
 #Finding 3
 
