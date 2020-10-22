@@ -1,51 +1,93 @@
 ---
 title: "fatal_shootings_data"
-output: html_document
+author: "YOUR NAMES" 
+date: "10/20/2020"
+output: 
+  html_document:
+    code_folding: hide
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    df_print: paged
+  md_document:
+    variant: markdown_github
+    toc: true
+    toc_depth: 3
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# load libraries
+## Introduction
+
+Just write a paragraph where you explain the purpose of this document. REVERSE ENGINEER THE STORY. [Nearly 250 women have been fatally shot by police since 2015](https://www.washingtonpost.com/graphics/2020/investigations/police-shootings-women/)
+
+DATA HAS BEEN UPDATED SINCE POST RAN STORY, SO OUR FINDINGS SLIGHTLY DIFFERENT. 
+
+## Load libraries
+
 ```{r}
+# Load tidyverse for general data analysis 
 library(tidyverse)
+
 ```
 
-#load data
+## Load and clean data
+DESCRIPTION OF WHAT THE DATA IS, WHERE YOU GOT IT, WHAT IT INCLUDES, INCLUDING A LIST OF WHAT EACH FIELD IS. 
+
+* name | character | name of person shot by police
+
 ```{r}
+
 fatal_shootings <- read_csv("fatal-police-shootings-data.csv")
+
 ```
 
-# examine data
+## Examine data
 ```{r}
+
 glimpse(fatal_shootings)
+
 ```
 
-# analysis
+## Analysis
 
-#Finding 1
+### Finding 1
 
 “Since The Washington Post began tracking fatal shootings by police in 2015, officers have fatally shot 247 women out of the more than 5,600 people killed overall.”
 
 ```{r}
+# Comment describing what you are doing with this code.  sorting by date from lowest to highest. 
 fatal_shootings %>%
   arrange(date) %>%
   select(date)
+
 #The Washington Post's first data point is from January 2, 2015.
+
 ```
 ```{r}
+
 women_only_fatal_police_shootings <- fatal_shootings %>%
   filter(gender == "F") %>%
   count()
+
+
 women_only_fatal_police_shootings
+
 #250 women have be shot and killed by police sinve 2015.
+
+
 ```
 
 ```{r}
+
 total_fatal_police_shootings <- fatal_shootings %>%
   count()
+
+
 total_fatal_police_shootings
+
 #There are 5680 records in the Post's data set, meaning that 5680 people have been shot and killed by police since the beginning of 2015. 
 ```
 #Finding 2
@@ -53,6 +95,7 @@ total_fatal_police_shootings
 “Since 2015, Black women have accounted for less than 1 percent of the overall fatal shootings in cases where race was known..."
 
 ```{r}
+# A COMMENT HERE EXPLAINGING STEP BY STEP WHAT'S IS HAPPENING. 
 fatal_shootings %>%
   filter(race != "None") %>%
   group_by(race, gender) %>%
@@ -90,40 +133,50 @@ fatal_shootings %>%
 "and 28 percent of the unarmed deaths.”
 
 ```{r}
+
+x <- fatal_shootings %>%
+  group_by(armed) %>%
+  count()
+
+x
+
 fatal_shootings %>%
   filter(armed == "unarmed") %>%
   filter(gender == "F") %>%
   group_by(armed, race, gender) %>%
-  select(armed, race, gender) %>%
+  #select(armed, race, gender) %>%
   summarize(total_unarmed_shootings = n()) %>%
   mutate(race_gender = paste(race, gender, sep = "-")) %>%
   ungroup() %>%
   select(race_gender, total_unarmed_shootings) %>%
   pivot_wider(names_from = race_gender, values_from = total_unarmed_shootings) %>%
   mutate(total_unarmed_shootings = sum(c_across(`B-F`:`NA-F`))) %>%
-  select(total_unarmed_shootings, `B-F`)
+  select(total_unarmed_shootings, `B-F`) %>%
+  mutate(pct_black_female = `B-F`/total_unarmed_shootings*100)
   
 ```
 
 
-#Finding 3
+### Finding 3
 
 “The starkest difference between women and men is the rate: Women account for about half the population, but 4 percent of the killings.”
 
 ```{r}
+# COMMENTS
 women_percentage <- fatal_shootings %>%
   group_by(gender) %>%
   count() %>%
   pivot_wider(names_from = gender , values_from = n) %>%
   mutate(total=`F`+`M`+`NA`) %>%
   mutate(percent_women = `F`/total*100)
+
+
 women_percentage
 ```
 
 
-
-
 ##Finding 4
+
 "About 31 percent, or 77, of the 247 women fatally shot by police since 2015 had mental health issues, compared to 22 percent of the 5,362 men killed."
 
 ```{r}
@@ -135,9 +188,18 @@ shootings_mental_health <- fatal_shootings %>%
   pivot_wider(names_from = gender, values_from = n) %>%
   mutate(percent_women = `F`/250*100) %>%
   mutate(percent_men = `M`/5429*100)
-  
+
+fatal_shootings  %>%
+  group_by(gender, signs_of_mental_illness) %>%
+  count() %>%
+  pivot_wider(names_from=signs_of_mental_illness, values_from=n) %>%
+  rename(mental_illness = `TRUE`, 
+         no_mental_illness = `FALSE`) %>%
+  mutate(total=no_mental_illness+mental_illness) %>%
+  mutate(pct_mental_illness = mental_illness/total*100) %>%
+  select(gender, pct_mental_illness)
 #The values for total men and women shot are known from Finding #3, however by entering those values into the formula myself I introduce potential for human error. Using this approach, I am not sure how to get those totals of men and women shot into the same data frame as the totals of mentally ill men and women shot. I tried another approach below.
-shootings_mental_health
+#shootings_mental_health
 ```
 
 ```{r}
@@ -161,3 +223,4 @@ shootings_mental_illness_percentage <- shootings_mental_illness_gender %>%
   mutate(gender_percent = mental_illness_total/gender_total*100)
 shootings_mental_illness_percentage
 #While this approach is accurate, I doubt it is the most efficient method.
+```
