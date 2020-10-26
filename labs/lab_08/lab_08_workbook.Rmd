@@ -98,6 +98,7 @@ glimpse(opioid_scrape)
 opioid_scrape
 
 # What flaws did you see?
+# Two flaws stood out to me. The first is 12 states had no data in the first column and the lack of data in those rows is accompanied by two rows with no data. The second is the columns are not labeled in a clear and descriptive way. After watching Sean's video, the major flaw that I missed was that the values in the second and third columns are being categorized as characters rather than as numbers.
 
 ```
 
@@ -130,7 +131,7 @@ As we work through the rest of this lab, you'll notice that we will continually 
 
 ### Fixing column names
 
-The data set we read in had two very unwiedly column names. 
+The data set we read in had two very unwieldy column names. 
 
 * `Opioid-Involved Overdose Deaths/100,000 persons1 (2018 )`
 * `Opioid Prescriptions/100 persons2 (2018)`
@@ -172,8 +173,8 @@ Now, it's your turn to use rename() to fix the opioid prescription rate column, 
 ```{r}
 opioid_scrape_clean <- opioid_scrape %>%
   clean_names() %>%
-  rename(opioid_death_rate = opioid_involved_overdose_deaths_100_000_persons1_2018) 
-  # Add an additional rename() function here as instructed
+  rename(opioid_death_rate = opioid_involved_overdose_deaths_100_000_persons1_2018) %>%
+  rename(opioid_prescription_rate = opioid_prescriptions_100_persons2_2018)  
 
 opioid_scrape_clean
 
@@ -346,8 +347,8 @@ opioid_scrape_clean <- opioid_scrape %>%
   remove_empty() %>%
   filter(state != "*Not included - Did not meet inclusion criteria") %>%
   mutate(opioid_death_rate = na_if(opioid_death_rate,"*")) %>%
-  mutate(opioid_prescription_rate = as.numeric(opioid_prescription_rate)) 
-  # Add an additional function here as instructed
+  mutate(opioid_prescription_rate = as.numeric(opioid_prescription_rate)) %>%
+  mutate(opioid_death_rate = as.numeric(opioid_death_rate))
 
 
 opioid_scrape_clean
