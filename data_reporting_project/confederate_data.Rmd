@@ -1,0 +1,151 @@
+---
+title: "Data_analysis_2"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+## Load Libraries
+
+```{r}
+library(tidyverse)
+library(janitor)
+library(readxl)
+```
+
+## Load data
+```{r}
+#loading schools race data
+# data dictionary for schools race schools_dictionary <-read_xlsx("data/2015-16_CCD_Companion_School_Membership_layout.xlsx")
+schools_race <- read_csv("data/nces_data.csv") %>%
+    clean_names() %>%
+    select(stabr, statename, lea_name, sch_name, total, am, as, hi, hp, bl, wh, tr) %>%
+    mutate(computed_total = am+as+hi+hp+bl+wh+tr,
+           total_check= total-computed_total) %>%
+    filter(total_check == 0) %>%
+    mutate(pct_black= round(bl/total*100,1))
+#loading heritage data
+heritage_schools <- read_csv("data/whose_heritage.csv") %>%
+  clean_names() %>%
+  filter(symbol_type == "School") %>%
+  rename(sch_name = feature_name) %>%
+  rename(stabr = state) %>% 
+  mutate(unique_id_honorees = paste0(unique_id, " ", honorees)) %>%
+  filter(unique_id_honorees != "5018 Jefferson Davis") %>%
+  filter(unique_id_honorees != "1478 Jefferson Davis")
+
+#loading the crosswalk
+crosswalk <- read_csv("data/schools_confederate_cross_walk.csv") %>%
+  mutate(unique_id_honorees = paste0(unique_id, " ", honorees)) %>%
+  filter(unique_id_honorees != "5018 Jefferson Davis") %>%
+  filter(unique_id_honorees != "1478 Jefferson Davis")
+  
+#Joining heritage schools to crosswalk
+heritage_schools_crosswalk <- heritage_schools %>%
+  inner_join(crosswalk, by = c("unique_id")) %>%
+  rename(stabr = stabr.y, sch_name = sch_name.y)
+
+#Joining to schools_race
+heritage_schools_race <- heritage_schools_crosswalk %>%
+  left_join(schools_race) %>%
+  filter(!is.na(bl)) %>%
+  select(unique_id, heritage_sch_name = sch_name.x, heritage_honorees = honorees.x, heritage_city = city.x, heritage_county = county.x, heritage_stabr = stabr.x, side:removed_after_charlottesville, lea_name, sch_name, total:pct_black) %>%
+  filter(tracking_status %in% c("Pending", "Live"))
+
+glimpse(heritage_schools_race)
+
+```
+
+
+###Notes: <a href= "https://www.edweek.org/ew/section/multimedia/data-the-schools-named-after-confederate-figures.html"> Schools named after confederate leaders</a> What is the racial makeup of these schools?  Colleges named after confederate leaders?  And racial makeup of those colleges?  What is the racial makeup of the counties or census tracts where these statues are located? 
+Are schools named after confederate leaders over representative of African American populations?
+
+
+
+```{r}
+heritage_schools <- heritage %>%
+  filter(symbol_type == "School") %>%
+  rename(sch_name = feature_name) %>%
+  rename(stabr = state) %>%
+	
+```
+county name/school district 
+
+```{r}
+join <- heritage_schools %>%
+  inner_join(schools_race, by = c("sch_name" , "stabr"))
+```
+```{r}
+```
+
+## Exploratory Analysis
+
+
+
+```{r}
+heritage %>%
+  group_by(symbol_category, symbol_type, state) %>%
+  count() %>%
+  arrange(desc(n))
+```
+
+
+```{r}
+heritage %>%
+  group_by(year_removed) %>%
+  count() %>%
+  arrange(desc(year_removed))
+```
+
+```{r}
+heritage %>%
+  group_by(state) %>%
+  count() %>%
+  arrange(desc(n))
+```
+
+```{r}
+heritage %>%
+  group_by(year_dedicated) %>%
+  count() %>%
+  arrange(desc(n))
+```
+###Notes:  After the massacre in SC in 2015, a national effort to take down monuments popped up across the country.  It's had more impact across the US.  What has happened in SC? South Carolina has done little rleatively to other places, total monuments in SC compared to other states, % of monuments removed inSC compared to other states, less than 1% of symbols removed in SC compared to other states. When did monuments go up in SC? What groups responsible, for putting up monuments?
+
+```{r}
+heritage %>%
+  filter(state == "SC") %>%
+  filter(symbol_type == "Monument") %>%
+  group_by(year_dedicated) %>%
+  count() %>%
+  mutate(decade = round(year_dedicated,-1)) %>%
+  group_by(decade) %>%
+  summarise(total_monuments = sum(n))
+```
+###Notes: How many statues remain on public land vs private land?  Is there something uniquely challenging about private land?
+```{r}
+heritage %>%
+    filter(symbol_type == "Monument") %>%
+    group_by(symbol_type, symbol_category) %>%
+    count() %>%
+    arrange(symbol_type, symbol_category)
+```
+
+```{r}
+monument <- heritage %>% 
+  filter(symbol_type == "Monument") %>%
+  filter(symbol_category == "Monument")
+```
+
+
+
+
+```{r}
+```
+
+
+
